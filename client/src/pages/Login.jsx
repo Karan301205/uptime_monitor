@@ -9,15 +9,25 @@ export default function Login() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    if (token) {
-      localStorage.setItem('token', token);
+    // 1. Grab token from URL
+    const tokenFromURL = searchParams.get('token');
+    
+    // 2. Grab token from LocalStorage (if we already have it)
+    const tokenFromStorage = localStorage.getItem('token');
+
+    if (tokenFromURL) {
+      // CASE A: Just came back from Google
+      localStorage.setItem('token', tokenFromURL);
+      // Force a hard reload to ensure api.js picks up the new token
+      window.location.href = '/dashboard'; 
+    } else if (tokenFromStorage) {
+      // CASE B: Already logged in
       navigate('/dashboard');
     }
   }, [searchParams, navigate]);
 
   const handleGoogleLogin = () => {
-    // 👇 NEW LIVE BACKEND URL
+    // Live Backend URL
     window.location.href = 'https://uptime-monitor-xipl.onrender.com/api/auth/google';
   };
 
@@ -26,7 +36,7 @@ export default function Login() {
     try {
       const { data } = await api.post('/auth/login', form);
       localStorage.setItem('token', data.token);
-      navigate('/dashboard');
+      window.location.href = '/dashboard'; // Force reload here too
     } catch (error) {
       alert('Invalid Credentials');
     }
@@ -37,7 +47,7 @@ export default function Login() {
       <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-600/30 rounded-full blur-[100px]"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-blue-600/30 rounded-full blur-[100px]"></div>
 
-      <div className="w-96 p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl z-10">
+      <div className="w-full max-w-md p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl z-10 mx-4">
         <div className="flex justify-center mb-6">
           <div className="p-3 bg-white/10 rounded-full text-yellow-400">
             <Zap size={32} />
@@ -47,7 +57,6 @@ export default function Login() {
         <h2 className="text-3xl font-bold mb-2 text-center text-white">Welcome Back</h2>
         <p className="text-slate-400 text-center mb-8 text-sm">Login to your dashboard</p>
         
-        {/* Google Button */}
         <button 
           onClick={handleGoogleLogin}
           className="w-full bg-white text-slate-900 p-3 rounded-lg mb-6 hover:bg-slate-200 font-bold transition flex items-center justify-center gap-2"

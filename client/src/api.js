@@ -1,19 +1,22 @@
-// client/src/api.js
 import axios from 'axios';
 
 const api = axios.create({
-  // Ensure this points to your Render backend
+  // Your Live Backend URL
   baseURL: 'https://uptime-monitor-xipl.onrender.com/api', 
 });
 
-// 👇 THIS IS THE MISSING PART CAUSING THE LOOP
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = token;
+// Add a request interceptor
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = token;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 export default api;
-
