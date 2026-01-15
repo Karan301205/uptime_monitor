@@ -1,0 +1,59 @@
+// server/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String?   
+  googleId  String?  
+  name      String?
+  createdAt DateTime  @default(now())
+  
+  monitors  Monitor[]
+}
+
+model Monitor {
+  id          Int      @id @default(autoincrement())
+  name        String   // e.g. "My Portfolio"
+  url         String   // e.g. "https://myportfolio.com"
+  interval    Int      @default(10) // Check every 10 minutes
+  isActive    Boolean  @default(true) // Can pause monitoring
+  userId      Int
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
+  logs        Log[]
+  incidents Incident[]
+  
+  createdAt   DateTime @default(now())
+}
+
+model Log {
+  id            Int      @id @default(autoincrement())
+  monitorId     Int
+  statusCode    Int      // e.g. 200, 404, 500
+  responseTime  Int      // in milliseconds (ms)
+  createdAt     DateTime @default(now())
+
+  // Relations
+  monitor       Monitor  @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  
+  @@index([monitorId]) // Makes querying logs faster
+}
+
+
+model Incident {
+  id        Int       @id @default(autoincrement())
+  monitorId Int
+  monitor   Monitor   @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  startsAt  DateTime  @default(now())
+  endsAt    DateTime? // Null means "Still Down" (Ongoing)
+}
