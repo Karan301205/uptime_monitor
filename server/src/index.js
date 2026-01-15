@@ -11,7 +11,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',                   // Your Local Frontend
+    'https://uptime-monitor-theta.vercel.app'  // Your Live Vercel Frontend
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(passport.initialize());
 app.use('/api', router);
