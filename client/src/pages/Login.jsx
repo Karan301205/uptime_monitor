@@ -17,7 +17,8 @@ export default function Login() {
   }, [searchParams, navigate]);
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:3000/api/auth/google';
+    // 👇 NEW LIVE BACKEND URL
+    window.location.href = 'https://uptime-monitor-xipl.onrender.com/api/auth/google';
   };
 
   const handleSubmit = async (e) => {
