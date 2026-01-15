@@ -30,18 +30,18 @@ router.get('/auth/google',
 );
 
 // 2. Google calls this back
-router.get('/auth/google/callback', 
-  passport.authenticate('google', { session: false }),
-  (req, res) => {
-    // Generate JWT for the Google User
-    const token = jwt.sign({ userId: req.user.id }, process.env.JWT_SECRET);
-    
-    // Redirect to Frontend with the token in the URL
-    // (In a production app, you might use cookies, but this is easiest for now)
-    res.redirect(`http://localhost:5173/login?token=${token}`);
-  }
-);
+// server/src/routes.js
 
+router.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
+  const token = jwt.sign({ id: req.user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+  // 👇 LOGIC: If we are in Production (Render), send to Vercel. Otherwise, Localhost.
+  const clientURL = process.env.NODE_ENV === 'production'
+    ? 'https://uptime-monitor-theta.vercel.app/login'  // Live Vercel Link
+    : 'http://localhost:5173/login';                   // Localhost
+
+  res.redirect(`${clientURL}?token=${token}`);
+});
 
 // 1. Register User
 router.post('/auth/register', async (req, res) => {
