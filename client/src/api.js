@@ -2,16 +2,18 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://uptime-monitor-xipl.onrender.com',
+  // Ensure this points to your Render backend
+  baseURL: 'https://uptime-monitor-xipl.onrender.com/api', 
 });
 
-// Automatically add the Token to every request if we have one
-api.interceptors.request.use((config) => {
+// 👇 THIS IS THE MISSING PART CAUSING THE LOOP
+api.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = token;
   }
   return config;
 });
 
 export default api;
+
