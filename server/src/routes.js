@@ -1,4 +1,3 @@
-// server/src/routes.js
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -8,16 +7,13 @@ require('./passport');
 
 const prisma = new PrismaClient();
 
-// --- FIXED MIDDLEWARE ---
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
   
-  // 1. Check if header exists
   if (!authHeader) {
     return res.status(401).json({ error: 'Unauthorized: No token header' });
   }
 
-  // 2. Smart Extraction: Handle both "Bearer <token>" and raw "<token>"
   const token = authHeader.startsWith('Bearer ')
     ? authHeader.split(' ')[1]
     : authHeader;
@@ -29,8 +25,7 @@ const authMiddleware = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // 3. Payload Fix: Check for both 'userId' (Normal) AND 'id' (Google)
-    req.userId = decoded.userId || decoded.id;
+      req.userId = decoded.userId || decoded.id;
 
     if (!req.userId) {
       throw new Error('Token is valid but contains no User ID');
@@ -43,19 +38,13 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-// --- AUTH ROUTES ---
-
-// 1. Redirect user to Google
 router.get('/auth/google', 
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
 
-// 2. Google Callback (FIXED)
 router.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
-  // FIX: Use 'userId' to match the standard login
   const token = jwt.sign({ userId: req.user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-  // Logic: Production vs Localhost
   const clientURL = process.env.NODE_ENV === 'production'
     ? 'https://uptime-monitor-theta.vercel.app/login' 
     : 'http://localhost:5173/login';
@@ -63,7 +52,6 @@ router.get('/auth/google/callback', passport.authenticate('google', { session: f
   res.redirect(`${clientURL}?token=${token}`);
 });
 
-// 3. Register User
 router.post('/auth/register', async (req, res) => {
   const { email, password, name } = req.body;
   try {
@@ -77,7 +65,6 @@ router.post('/auth/register', async (req, res) => {
   }
 });
 
-// 4. Login User
 router.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
   const user = await prisma.user.findUnique({ where: { email } });
@@ -89,8 +76,6 @@ router.post('/auth/login', async (req, res) => {
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
   res.json({ token, user: { name: user.name, email: user.email } });
 });
-
-// --- MONITOR ROUTES (Protected) ---
 
 router.get('/monitors', authMiddleware, async (req, res) => {
   try {
@@ -127,6 +112,32 @@ router.delete('/monitors/:id', authMiddleware, async (req, res) => {
     res.json({ message: 'Deleted' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete' });
+  }
+});
+
+router.get('/auth/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId }, 
+      select: { 
+        name: true, 
+        email: true, 
+        createdAt: true,
+        monitors: {
+          select: {
+            id: true,
+            name: true,
+            url: true,
+            status: true,   
+            isActive: true  
+          }
+        }
+      }
+    });
+    res.json(user);
+  } catch (error) {
+    console.error("Profile Error:", error);
+    res.status(500).json({ error: 'Failed to fetch profile' });
   }
 });
 

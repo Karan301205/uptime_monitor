@@ -1,4 +1,3 @@
-// server/src/cron.js
 const cron = require('node-cron');
 const axios = require('axios');
 const nodemailer = require('nodemailer');
@@ -42,9 +41,6 @@ async function checkMonitor(monitor) {
 
   const isUp = status === 200;
 
-  // --- INCIDENT LOGIC ---
-  
-  // 1. Find if there is currently an OPEN incident (Site is already down)
   const openIncident = await prisma.incident.findFirst({
     where: { 
       monitorId: monitor.id, 
@@ -53,32 +49,25 @@ async function checkMonitor(monitor) {
   });
 
   if (!isUp && !openIncident) {
-    // CASE A: Site Just Crashed (Up -> Down)
     console.log(`❌ ${monitor.url} went DOWN. Opening Incident.`);
     
-    // Create new Incident
     await prisma.incident.create({
       data: { monitorId: monitor.id, startsAt: new Date() }
     });
     
-    // Send Email
     if (monitor.user?.email) await sendAlertEmail(monitor.user.email, monitor.url, 'DOWN');
 
   } else if (isUp && openIncident) {
-    // CASE B: Site Just Recovered (Down -> Up)
     console.log(`✅ ${monitor.url} recovered. Closing Incident.`);
     
-    // Close the Incident
     await prisma.incident.update({
       where: { id: openIncident.id },
       data: { endsAt: new Date() }
     });
 
-    // Send Recovery Email (Optional, but users love this)
     if (monitor.user?.email) await sendAlertEmail(monitor.user.email, monitor.url, 'UP');
   }
 
-  // Save Log (We still keep the graph data)
   await prisma.log.create({
     data: {
       monitorId: monitor.id,

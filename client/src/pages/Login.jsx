@@ -9,25 +9,18 @@ export default function Login() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // 1. Grab token from URL
     const tokenFromURL = searchParams.get('token');
-    
-    // 2. Grab token from LocalStorage (if we already have it)
     const tokenFromStorage = localStorage.getItem('token');
 
     if (tokenFromURL) {
-      // CASE A: Just came back from Google
       localStorage.setItem('token', tokenFromURL);
-      // Force a hard reload to ensure api.js picks up the new token
       window.location.href = '/dashboard'; 
     } else if (tokenFromStorage) {
-      // CASE B: Already logged in
       navigate('/dashboard');
     }
   }, [searchParams, navigate]);
 
   const handleGoogleLogin = () => {
-    // Live Backend URL
     window.location.href = 'https://uptime-monitor-xipl.onrender.com/api/auth/google';
   };
 
@@ -36,7 +29,7 @@ export default function Login() {
     try {
       const { data } = await api.post('/auth/login', form);
       localStorage.setItem('token', data.token);
-      window.location.href = '/dashboard'; // Force reload here too
+      window.location.href = '/dashboard';
     } catch (error) {
       alert('Invalid Credentials');
     }

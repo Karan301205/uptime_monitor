@@ -1,4 +1,3 @@
-// server/src/index.js
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -13,8 +12,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors({
   origin: [
-    'http://localhost:5173',                   // Your Local Frontend
-    'https://uptime-monitor-theta.vercel.app'  // Your Live Vercel Frontend
+    'http://localhost:5173',                     
+    'https://uptime-monitor-theta.vercel.app'  
   ],
   credentials: true
 }));
@@ -26,10 +25,8 @@ app.get('/', (req, res) => {
   res.send('Uptime Monitor API is running 🚀');
 });
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   
-  // Start the background worker
   startCronJob(); 
 });

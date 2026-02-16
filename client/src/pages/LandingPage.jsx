@@ -5,7 +5,6 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-900 text-white selection:bg-purple-500 selection:text-white">
       
-      {/* --- HEADER --- */}
       <nav className="flex justify-between items-center p-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-2 text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
           <Activity size={32} className="text-purple-500" />
@@ -21,7 +20,6 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* --- HERO SECTION --- */}
       <div className="flex flex-col items-center justify-center text-center mt-20 px-4">
         <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
           Never let your site <br />
@@ -41,9 +39,7 @@ export default function LandingPage() {
         </Link>
       </div>
 
-      {/* --- FEATURES (Glass Cards) --- */}
       <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto mt-32 px-6 pb-20">
-        {/* Card 1 */}
         <div className="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-lg hover:border-purple-500/50 transition duration-300">
           <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4 text-purple-400">
             <Zap size={24} />
@@ -52,7 +48,6 @@ export default function LandingPage() {
           <p className="text-slate-400">We monitor your website every 60 seconds from our global servers to ensure maximum availability.</p>
         </div>
 
-        {/* Card 2 */}
         <div className="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-lg hover:border-pink-500/50 transition duration-300">
           <div className="w-12 h-12 bg-pink-500/20 rounded-lg flex items-center justify-center mb-4 text-pink-400">
             <Activity size={24} />
@@ -61,7 +56,6 @@ export default function LandingPage() {
           <p className="text-slate-400">Keep track of every downtime event. We log exactly when your site went down and when it came back.</p>
         </div>
 
-        {/* Card 3 */}
         <div className="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-lg hover:border-blue-500/50 transition duration-300">
           <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 text-blue-400">
             <Shield size={24} />

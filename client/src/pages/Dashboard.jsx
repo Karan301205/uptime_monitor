@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
-import { LogOut, Plus, Trash2, AlertTriangle, CheckCircle, Activity } from 'lucide-react';
 import { LineChart, Line, Tooltip, ResponsiveContainer, YAxis } from 'recharts';
+import { Plus, Trash2, Activity, AlertTriangle, CheckCircle, User } from 'lucide-react';
 
 export default function Dashboard() {
   const [monitors, setMonitors] = useState([]);
@@ -12,9 +12,11 @@ export default function Dashboard() {
   useEffect(() => {
     api.get('/monitors')
       .then(res => setMonitors(res.data))
-      .catch(() => navigate('/login'));
+      .catch(() => {
+        localStorage.removeItem('token'); 
+        navigate('/login');
+      });
   }, []);
-
   const addMonitor = async (e) => {
     e.preventDefault();
     const { data } = await api.post('/monitors', newMonitor);
@@ -28,11 +30,6 @@ export default function Dashboard() {
     setMonitors(monitors.filter(m => m.id !== id));
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return 'Now';
     return new Date(dateString).toLocaleString();
@@ -40,7 +37,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen p-8 bg-slate-900 text-white">
-      {/* Header */}
       <div className="max-w-6xl mx-auto mb-8 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <Activity className="text-purple-500" size={32} />
@@ -48,13 +44,13 @@ export default function Dashboard() {
             Dashboard
           </h1>
         </div>
-        <button onClick={handleLogout} className="flex items-center gap-2 text-slate-400 hover:text-white transition">
-          <LogOut size={20} /> Logout
-        </button>
+        
+        <Link to="/profile" className="p-3 bg-slate-800 hover:bg-slate-700 rounded-full transition border border-slate-700 text-slate-300 hover:text-white shadow-lg group">
+          <User size={24} className="group-hover:scale-110 transition" />
+        </Link>
       </div>
 
       <div className="max-w-6xl mx-auto">
-        {/* Add Monitor Form */}
         <form onSubmit={addMonitor} className="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-lg mb-10 flex gap-4 shadow-xl">
           <input 
             className="flex-1 bg-slate-800 border border-slate-700 p-3 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-purple-500" 
@@ -75,16 +71,14 @@ export default function Dashboard() {
           </button>
         </form>
 
-        {/* Monitor List */}
         <div className="grid gap-6">
           {monitors.map(monitor => (
             <div key={monitor.id} className="bg-slate-800/50 border border-white/5 p-6 rounded-2xl shadow-lg hover:border-purple-500/30 transition duration-300">
-              {/* Card Header */}
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h3 className="text-2xl font-bold flex items-center gap-3">
                     {monitor.name}
-                    <a href={monitor.url} target="_blank" className="text-slate-500 text-base font-normal hover:text-purple-400 transition">{monitor.url}</a>
+                    <a href={monitor.url} target="_blank" rel="noreferrer" className="text-slate-500 text-base font-normal hover:text-purple-400 transition">{monitor.url}</a>
                   </h3>
                   <div className="flex items-center gap-2 mt-2">
                       <span className={`relative flex h-3 w-3`}>
@@ -102,11 +96,9 @@ export default function Dashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Graph */}
                 <div className="md:col-span-2 h-40 bg-slate-900/50 rounded-xl border border-white/5 p-4">
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={monitor.logs.slice().reverse()}>
-                            {/* Purple Line for Dark Mode */}
                             <Line type="step" dataKey="responseTime" stroke="#a855f7" strokeWidth={3} dot={false} />
                             <Tooltip 
                               contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#fff' }} 
@@ -117,7 +109,6 @@ export default function Dashboard() {
                     </ResponsiveContainer>
                 </div>
 
-                {/* History Box */}
                 <div className="bg-slate-900/50 rounded-xl border border-white/5 p-4 overflow-y-auto h-40 scrollbar-thin scrollbar-thumb-slate-700">
                   <h4 className="font-bold text-slate-400 mb-3 text-xs uppercase tracking-wider">Recent Incidents</h4>
                   {monitor.incidents && monitor.incidents.length > 0 ? (
