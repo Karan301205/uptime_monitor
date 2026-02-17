@@ -115,6 +115,7 @@ router.delete('/monitors/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// --- USER PROFILE ROUTE (FIXED) ---
 router.get('/auth/me', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
@@ -128,8 +129,12 @@ router.get('/auth/me', authMiddleware, async (req, res) => {
             id: true,
             name: true,
             url: true,
-            status: true,   
-            isActive: true  
+            isActive: true,
+            logs: {
+              take: 1,
+              orderBy: { createdAt: 'desc' },
+              select: { statusCode: true }
+            }
           }
         }
       }
